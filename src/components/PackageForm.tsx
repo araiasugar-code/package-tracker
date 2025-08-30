@@ -8,7 +8,7 @@ import FileUpload from './FileUpload'
 import { DELIVERY_STATUSES, DATA_PROCESSING_STATUSES } from '@/lib/supabase'
 
 interface PackageFormProps {
-  package?: Package | null
+  package?: Package
   onClose: () => void
   onSuccess: () => void
 }

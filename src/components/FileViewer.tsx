@@ -29,7 +29,7 @@ export default function FileViewer({ files, onClose }: FileViewerProps) {
       link.click()
       document.body.removeChild(link)
     } catch (err) {
-      setError(`ファイルのダウンロードに失敗しました: ${err.message}`)
+      setError(`ファイルのダウンロードに失敗しました: ${err instanceof Error ? err.message : String(err)}`)
       console.error('Download error:', err)
     } finally {
       setDownloading(prev => ({ ...prev, [file.id]: false }))

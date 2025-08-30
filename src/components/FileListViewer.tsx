@@ -11,7 +11,7 @@ interface FileListViewerProps {
   onClose: () => void
 }
 
-export default function FileListViewer({ packageId, files, onClose }: FileListViewerProps) {
+export default function FileListViewer({ files, onClose }: FileListViewerProps) {
   const [downloading, setDownloading] = useState<{[key: string]: boolean}>({})
   const [error, setError] = useState<string | null>(null)
   const [selectedFile, setSelectedFile] = useState<PackageFile | null>(null)
@@ -31,8 +31,8 @@ export default function FileListViewer({ packageId, files, onClose }: FileListVi
       a.click()
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
-    } catch (err: any) {
-      setError(`ファイルのダウンロードに失敗しました: ${err.message}`)
+    } catch (err) {
+      setError(`ファイルのダウンロードに失敗しました: ${(err as Error).message}`)
       console.error('Download error:', err)
     } finally {
       setDownloading(prev => ({ ...prev, [file.id]: false }))

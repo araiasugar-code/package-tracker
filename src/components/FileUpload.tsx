@@ -38,7 +38,7 @@ export default function FileUpload({ packageId, onFileUploaded }: FileUploadProp
     try {
       const uploadedFile = await fileService.uploadFile(packageId, file, user.id)
       onFileUploaded(uploadedFile)
-    } catch (err: any) {
+    } catch (err) {
       setError('ファイルのアップロードに失敗しました')
       console.error(err)
     } finally {

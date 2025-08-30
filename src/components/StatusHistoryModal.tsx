@@ -9,7 +9,7 @@ interface StatusHistoryModalProps {
   onClose: () => void
 }
 
-export default function StatusHistoryModal({ packageId, packageNumber, history, onClose }: StatusHistoryModalProps) {
+export default function StatusHistoryModal({ packageNumber, history, onClose }: StatusHistoryModalProps) {
   const getFieldLabel = (fieldName: string): string => {
     const labels: { [key: string]: string } = {
       'package_number': '荷物番号',

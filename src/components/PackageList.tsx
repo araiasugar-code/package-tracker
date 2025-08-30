@@ -11,7 +11,6 @@ import SearchFilter, { FilterOptions } from './SearchFilter'
 import FileListViewer from './FileListViewer'
 import StatusHistoryModal from './StatusHistoryModal'
 import StatusSummary from './StatusSummary'
-import { DELIVERY_STATUSES, DATA_PROCESSING_STATUSES } from '@/lib/supabase'
 
 type SortField = 'created_at' | 'shipping_date' | 'estimated_arrival_date'
 type SortOrder = 'asc' | 'desc'
@@ -26,7 +25,7 @@ export default function PackageList() {
   const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null)
   const [packageFiles, setPackageFiles] = useState<{[key: string]: PackageFile[]}>({})
   const [packageHistory, setPackageHistory] = useState<{[key: string]: PackageStatusHistory[]}>({})
-  const [expandedHistory, setExpandedHistory] = useState<{[key: string]: boolean}>({})
+  // const [expandedHistory, setExpandedHistory] = useState<{[key: string]: boolean}>({}) // 未使用のためコメントアウト
   const [showFileViewer, setShowFileViewer] = useState(false)
   const [selectedPackageFiles, setSelectedPackageFiles] = useState<{packageId: string, files: PackageFile[]}>({packageId: '', files: []})
   const [showStatusHistory, setShowStatusHistory] = useState(false)

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { PackageFile } from '@/types/package'
 import { fileService } from '@/lib/fileService'
 import FileViewModal from './FileViewModal'
@@ -11,7 +11,7 @@ interface FileListProps {
   onFilesChange: (files: PackageFile[]) => void
 }
 
-export default function FileList({ packageId, files, onFilesChange }: FileListProps) {
+export default function FileList({ files, onFilesChange }: FileListProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [selectedFile, setSelectedFile] = useState<PackageFile | null>(null)
@@ -32,7 +32,7 @@ export default function FileList({ packageId, files, onFilesChange }: FileListPr
       await fileService.deleteFile(fileId)
       const updatedFiles = files.filter(f => f.id !== fileId)
       onFilesChange(updatedFiles)
-    } catch (err: any) {
+    } catch (err) {
       setError('ファイルの削除に失敗しました')
       console.error(err)
     } finally {

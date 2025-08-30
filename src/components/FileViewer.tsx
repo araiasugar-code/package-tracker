@@ -10,7 +10,7 @@ interface FileViewerProps {
   onClose: () => void
 }
 
-export default function FileViewer({ packageId, files, onClose }: FileViewerProps) {
+export default function FileViewer({ files, onClose }: FileViewerProps) {
   const [downloading, setDownloading] = useState<{[key: string]: boolean}>({})
   const [error, setError] = useState<string | null>(null)
 
@@ -28,7 +28,7 @@ export default function FileViewer({ packageId, files, onClose }: FileViewerProp
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
-    } catch (err: any) {
+    } catch (err) {
       setError(`ファイルのダウンロードに失敗しました: ${err.message}`)
       console.error('Download error:', err)
     } finally {

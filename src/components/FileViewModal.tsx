@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { PackageFile } from '@/types/package'
 import { fileService } from '@/lib/fileService'
 
@@ -25,9 +25,9 @@ export default function FileViewModal({ file, isOpen, onClose }: FileViewModalPr
         URL.revokeObjectURL(fileUrl)
       }
     }
-  }, [isOpen, file])
+  }, [isOpen, file, loadFileUrl])
 
-  const loadFileUrl = async () => {
+  const loadFileUrl = useCallback(async () => {
     setLoading(true)
     setError(null)
     try {
@@ -39,7 +39,7 @@ export default function FileViewModal({ file, isOpen, onClose }: FileViewModalPr
     } finally {
       setLoading(false)
     }
-  }
+  }, [file.file_path])
 
   const handleDownload = async () => {
     setDownloading(true)

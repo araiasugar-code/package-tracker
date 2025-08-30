@@ -20,10 +20,11 @@ export default function PackageDetail({ packageId, onClose }: PackageDetailProps
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'details' | 'files' | 'history'>('details')
-  const { user } = useAuth()
+  // const { user } = useAuth() // 未使用のためコメントアウト
 
   useEffect(() => {
     loadPackageData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [packageId])
 
   const loadPackageData = async () => {
@@ -38,7 +39,7 @@ export default function PackageDetail({ packageId, onClose }: PackageDetailProps
       setPkg(packageData)
       setFiles(packageFiles)
       setHistory(packageHistory)
-    } catch (err: any) {
+    } catch (err) {
       setError('データの読み込みに失敗しました')
       console.error(err)
     } finally {

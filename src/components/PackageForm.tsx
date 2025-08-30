@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { Package, PackageInsert, PackageUpdate, PackageFile } from '@/types/package'
 import { packageService } from '@/lib/packageService'
-import { fileService } from '@/lib/fileService'
 import { useAuth } from './AuthProvider'
 import FileUpload from './FileUpload'
 import { DELIVERY_STATUSES, DATA_PROCESSING_STATUSES } from '@/lib/supabase'
@@ -82,8 +81,8 @@ export default function PackageForm({ package: pkg, onClose, onSuccess }: Packag
         setCreatedPackageId(newPackage.id)
         // 新規作成後もフォームを表示してファイルアップロードを可能にする
       }
-    } catch (err: any) {
-      setError(err.message || '保存に失敗しました')
+    } catch (err) {
+      setError((err as Error).message || '保存に失敗しました')
     } finally {
       setLoading(false)
     }
@@ -103,7 +102,7 @@ export default function PackageForm({ package: pkg, onClose, onSuccess }: Packag
     setFormData(prev => ({ ...prev, [name]: value }))
   }
 
-  const isDataProcessingRequired = formData.data_processing_status !== '予約無し'
+  // const isDataProcessingRequired = formData.data_processing_status !== '予約無し' // 未使用のためコメントアウト
 
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center p-4">

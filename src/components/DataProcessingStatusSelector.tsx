@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { DATA_PROCESSING_STATUSES, DataProcessingStatus } from '@/lib/supabase'
 
 interface DataProcessingStatusSelectorProps {

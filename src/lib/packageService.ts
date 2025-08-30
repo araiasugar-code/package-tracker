@@ -2,7 +2,8 @@ import { createClient } from './auth'
 import { Package, PackageInsert, PackageUpdate, PackageStatusHistory } from '@/types/package'
 
 export class PackageService {
-  private supabase = createClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private supabase = createClient() as any
 
   async getAllPackages(): Promise<Package[]> {
     const { data, error } = await this.supabase

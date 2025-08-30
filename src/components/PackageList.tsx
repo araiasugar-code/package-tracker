@@ -640,7 +640,7 @@ export default function PackageList() {
       {/* Package Form Modal */}
       {showForm && (
         <PackageForm
-          package={editingPackage}
+          package={editingPackage || undefined}
           onClose={handleFormClose}
           onSuccess={handleFormSuccess}
         />

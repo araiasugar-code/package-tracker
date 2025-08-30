@@ -2,7 +2,8 @@ import { createClient } from './auth'
 import { PackageFile } from '@/types/package'
 
 export class FileService {
-  private supabase = createClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private supabase = createClient() as any
 
   async uploadFile(packageId: string, file: File, userId: string): Promise<PackageFile> {
     const fileExt = file.name.split('.').pop()

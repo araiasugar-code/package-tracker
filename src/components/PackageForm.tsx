@@ -13,7 +13,7 @@ interface PackageFormProps {
   onSuccess: () => void
 }
 
-export default function PackageForm({ package: pkg, onClose, onSuccess }: PackageFormProps) {
+export default function PackageForm({ package: packageProp, onClose, onSuccess }: PackageFormProps) {
   const [formData, setFormData] = useState({
     package_number: '',
     shipper_name: '',
@@ -30,18 +30,18 @@ export default function PackageForm({ package: pkg, onClose, onSuccess }: Packag
   const { user } = useAuth()
 
   useEffect(() => {
-    if (pkg) {
+    if (packageProp) {
       setFormData({
-        package_number: pkg.package_number,
-        shipper_name: pkg.shipper_name,
-        shipping_date: pkg.shipping_date,
-        estimated_arrival_date: pkg.estimated_arrival_date,
-        delivery_status: pkg.delivery_status,
-        data_processing_status: pkg.data_processing_status,
-        remarks: pkg.remarks || ''
+        package_number: packageProp.package_number,
+        shipper_name: packageProp.shipper_name,
+        shipping_date: packageProp.shipping_date,
+        estimated_arrival_date: packageProp.estimated_arrival_date,
+        delivery_status: packageProp.delivery_status,
+        data_processing_status: packageProp.data_processing_status,
+        remarks: packageProp.remarks || ''
       })
     }
-  }, [pkg])
+  }, [packageProp])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -51,7 +51,7 @@ export default function PackageForm({ package: pkg, onClose, onSuccess }: Packag
     setError(null)
 
     try {
-      if (pkg) {
+      if (packageProp) {
         // 編集の場合
         const updates: PackageUpdate = {
           package_number: formData.package_number,
@@ -62,7 +62,7 @@ export default function PackageForm({ package: pkg, onClose, onSuccess }: Packag
           data_processing_status: formData.data_processing_status,
           remarks: formData.remarks || null
         }
-        await packageService.updatePackage(pkg.id, updates, user.id)
+        await packageService.updatePackage(packageProp.id, updates, user.id)
         onSuccess()
         onClose()
       } else {
@@ -109,7 +109,7 @@ export default function PackageForm({ package: pkg, onClose, onSuccess }: Packag
       <div className="relative bg-white p-6 rounded-lg shadow-lg max-w-lg w-full max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-medium text-gray-900">
-            {pkg ? '荷物情報編集' : (createdPackageId ? '荷物追加完了' : '新規荷物追加')}
+            {packageProp ? '荷物情報編集' : (createdPackageId ? '荷物追加完了' : '新規荷物追加')}
           </h3>
           <button
             onClick={onClose}
@@ -119,7 +119,7 @@ export default function PackageForm({ package: pkg, onClose, onSuccess }: Packag
           </button>
         </div>
 
-        {!pkg && !createdPackageId ? (
+        {!packageProp && !createdPackageId ? (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -234,9 +234,9 @@ export default function PackageForm({ package: pkg, onClose, onSuccess }: Packag
             <label className="block text-sm font-medium text-gray-700 mb-1">
               納品書・資料のアップロード
             </label>
-            {(pkg || createdPackageId) && (
+            {(packageProp || createdPackageId) && (
               <FileUpload
-                packageId={pkg ? pkg.id : createdPackageId!}
+                packageId={packageProp && 'id' in packageProp ? (packageProp as Package).id : (createdPackageId || '')}
                 onFileUploaded={handleFileUploaded}
               />
             )}
@@ -245,7 +245,7 @@ export default function PackageForm({ package: pkg, onClose, onSuccess }: Packag
                 ✅ {uploadedFiles.length}個のファイルがアップロードされました
               </div>
             )}
-            {!pkg && !createdPackageId && (
+            {!packageProp && !createdPackageId && (
               <p className="text-sm text-gray-500">
                 荷物情報を保存後にファイルをアップロードできます
               </p>
@@ -305,11 +305,11 @@ export default function PackageForm({ package: pkg, onClose, onSuccess }: Packag
                 disabled={loading}
                 className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? '保存中...' : (pkg ? '更新' : '追加')}
+                {loading ? '保存中...' : (packageProp ? '更新' : '追加')}
               </button>
             </div>
           </form>
-        ) : pkg ? (
+        ) : packageProp ? (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -424,9 +424,9 @@ export default function PackageForm({ package: pkg, onClose, onSuccess }: Packag
             <label className="block text-sm font-medium text-gray-700 mb-1">
               納品書・資料のアップロード
             </label>
-            {(pkg || createdPackageId) && (
+            {(packageProp || createdPackageId) && (
               <FileUpload
-                packageId={pkg ? pkg.id : createdPackageId!}
+                packageId={packageProp && 'id' in packageProp ? (packageProp as Package).id : (createdPackageId || '')}
                 onFileUploaded={handleFileUploaded}
               />
             )}
@@ -435,7 +435,7 @@ export default function PackageForm({ package: pkg, onClose, onSuccess }: Packag
                 ✅ {uploadedFiles.length}個のファイルがアップロードされました
               </div>
             )}
-            {!pkg && !createdPackageId && (
+            {!packageProp && !createdPackageId && (
               <p className="text-sm text-gray-500">
                 荷物情報を保存後にファイルをアップロードできます
               </p>
@@ -516,7 +516,7 @@ export default function PackageForm({ package: pkg, onClose, onSuccess }: Packag
                 納品書・資料のアップロード
               </label>
               <FileUpload
-                packageId={createdPackageId}
+                packageId={createdPackageId!}
                 onFileUploaded={handleFileUploaded}
               />
               {uploadedFiles.length > 0 && (

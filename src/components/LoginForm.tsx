@@ -2,12 +2,16 @@
 
 import { useState } from 'react'
 import { useAuth } from './AuthProvider'
+import SignUpForm from './SignUpForm'
+import PasswordResetForm from './PasswordResetForm'
 
 export default function LoginForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [showSignUp, setShowSignUp] = useState(false)
+  const [showPasswordReset, setShowPasswordReset] = useState(false)
   const { signIn } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -72,7 +76,46 @@ export default function LoginForm() {
               {loading ? 'ログイン中...' : 'ログイン'}
             </button>
           </div>
+
+          <div className="flex items-center justify-between">
+            <button
+              type="button"
+              onClick={() => setShowPasswordReset(true)}
+              className="text-sm text-indigo-600 hover:text-indigo-500"
+            >
+              パスワードを忘れた場合
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowSignUp(true)}
+              className="text-sm text-indigo-600 hover:text-indigo-500"
+            >
+              新規アカウント作成
+            </button>
+          </div>
         </form>
+
+        {showSignUp && (
+          <SignUpForm
+            onClose={() => setShowSignUp(false)}
+            onSuccess={() => {
+              setShowSignUp(false)
+              setError('')
+            }}
+            onSwitchToSignIn={() => setShowSignUp(false)}
+          />
+        )}
+
+        {showPasswordReset && (
+          <PasswordResetForm
+            onClose={() => setShowPasswordReset(false)}
+            onSuccess={() => {
+              setShowPasswordReset(false)
+              setError('')
+            }}
+            onSwitchToSignIn={() => setShowPasswordReset(false)}
+          />
+        )}
       </div>
     </div>
   )

@@ -22,7 +22,11 @@ export default function LoginForm() {
     const { error } = await signIn(email, password)
     
     if (error) {
-      setError('ログインに失敗しました。メールアドレスとパスワードを確認してください。')
+      if (error.message?.includes('Invalid login credentials') || error.message?.includes('Email not confirmed')) {
+        setError('ログインに失敗しました。メールアドレスとパスワードを確認するか、アカウント作成後のメール認証を完了してください。')
+      } else {
+        setError('ログインに失敗しました。メールアドレスとパスワードを確認してください。')
+      }
     }
     
     setLoading(false)

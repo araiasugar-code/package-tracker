@@ -52,10 +52,17 @@ export default function SignUpForm({ onClose, onSuccess, onSwitchToSignIn }: Sig
       if (error) throw error
 
       if (data.user) {
-        setSuccess(true)
-        setTimeout(() => {
+        // メール確認が不要な場合は即座にログインできる
+        if (data.user.email_confirmed_at) {
+          // すでに確認済みの場合は直接ログイン画面に戻る
           onSuccess()
-        }, 2000)
+        } else {
+          // 確認が必要な場合は確認メッセージを表示
+          setSuccess(true)
+          setTimeout(() => {
+            onSuccess()
+          }, 3000)
+        }
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'アカウント作成に失敗しました')
@@ -85,7 +92,8 @@ export default function SignUpForm({ onClose, onSuccess, onSwitchToSignIn }: Sig
               アカウント作成完了
             </h3>
             <p className="text-sm text-gray-600 mb-4">
-              確認メールを送信しました。メール内のリンクをクリックしてアカウントを有効化してください。
+              確認メールを送信しました。メール内のリンクをクリックしてアカウントを有効化してください。<br />
+              <strong>注意：メール認証が完了するまでログインできません。</strong>
             </p>
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-600 mx-auto"></div>
             <p className="text-xs text-gray-500 mt-2">自動的にログイン画面に戻ります...</p>

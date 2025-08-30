@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Package, PackageFile, PackageStatusHistory } from '@/types/package'
 import { packageService } from '@/lib/packageService'
 import { fileService } from '@/lib/fileService'
-import { useAuth } from './AuthProvider'
+// import { useAuth } from './AuthProvider' // 未使用のためコメントアウト
 import FileUpload from './FileUpload'
 import FileList from './FileList'
 

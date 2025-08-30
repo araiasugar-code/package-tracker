@@ -16,17 +16,6 @@ export default function FileViewModal({ file, isOpen, onClose }: FileViewModalPr
   const [error, setError] = useState<string | null>(null)
   const [downloading, setDownloading] = useState(false)
 
-  useEffect(() => {
-    if (isOpen && file) {
-      loadFileUrl()
-    }
-    return () => {
-      if (fileUrl) {
-        URL.revokeObjectURL(fileUrl)
-      }
-    }
-  }, [isOpen, file, loadFileUrl])
-
   const loadFileUrl = useCallback(async () => {
     setLoading(true)
     setError(null)
@@ -40,6 +29,17 @@ export default function FileViewModal({ file, isOpen, onClose }: FileViewModalPr
       setLoading(false)
     }
   }, [file.file_path])
+
+  useEffect(() => {
+    if (isOpen && file) {
+      loadFileUrl()
+    }
+    return () => {
+      if (fileUrl) {
+        URL.revokeObjectURL(fileUrl)
+      }
+    }
+  }, [isOpen, file, loadFileUrl, fileUrl])
 
   const handleDownload = async () => {
     setDownloading(true)
@@ -130,6 +130,7 @@ export default function FileViewModal({ file, isOpen, onClose }: FileViewModalPr
           {!loading && !error && fileUrl && (
             <div className="flex justify-center">
               {isImage ? (
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img 
                   src={fileUrl} 
                   alt={file.file_name}

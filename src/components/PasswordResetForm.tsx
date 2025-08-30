@@ -29,8 +29,10 @@ export default function PasswordResetForm({ onClose, onSuccess, onSwitchToSignIn
     setError(null)
 
     try {
+      const redirectUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password`
+        
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/reset-password`
+        redirectTo: redirectUrl
       })
 
       if (error) throw error

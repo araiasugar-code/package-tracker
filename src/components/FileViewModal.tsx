@@ -130,7 +130,7 @@ export default function FileViewModal({ file, isOpen, onClose }: FileViewModalPr
           {!loading && !error && fileUrl && (
             <div className="flex justify-center">
               {isImage ? (
-                {/* eslint-disable-next-line @next/next/no-img-element */}
+                /* eslint-disable-next-line @next/next/no-img-element */
                 <img 
                   src={fileUrl} 
                   alt={file.file_name}

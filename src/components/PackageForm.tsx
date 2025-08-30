@@ -234,9 +234,9 @@ export default function PackageForm({ package: pkg, onClose, onSuccess }: Packag
             <label className="block text-sm font-medium text-gray-700 mb-1">
               納品書・資料のアップロード
             </label>
-            {(pkg || createdPackageId) && (
+            {(pkg?.id || createdPackageId) && (
               <FileUpload
-                packageId={(pkg?.id || createdPackageId) as string}
+                packageId={pkg?.id || createdPackageId!}
                 onFileUploaded={handleFileUploaded}
               />
             )}
@@ -424,9 +424,9 @@ export default function PackageForm({ package: pkg, onClose, onSuccess }: Packag
             <label className="block text-sm font-medium text-gray-700 mb-1">
               納品書・資料のアップロード
             </label>
-            {(pkg || createdPackageId) && (
+            {(pkg?.id || createdPackageId) && (
               <FileUpload
-                packageId={(pkg?.id || createdPackageId) as string}
+                packageId={pkg?.id || createdPackageId!}
                 onFileUploaded={handleFileUploaded}
               />
             )}

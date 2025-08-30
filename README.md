@@ -1,36 +1,133 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 荷物管理システム
 
-## Getting Started
+社内数人で使用する荷物追跡・管理システムです。海外・国内メーカーからの商品発送状況をチーム全体で把握し、データ処理状況の可視化と管理を行います。
 
-First, run the development server:
+## 技術スタック
+
+- **フロントエンド**: Next.js 14 + TypeScript
+- **バックエンド**: Supabase（認証・データベース・ストレージ）
+- **スタイリング**: Tailwind CSS
+- **デプロイ**: Vercel
+
+## 機能一覧
+
+### 認証機能
+- ログイン・ログアウト
+- ユーザー管理（管理者のみ新規登録可能）
+
+### 荷物管理
+- 荷物情報のCRUD操作
+- ステータス管理（配送・データ処理）
+- 検索・フィルター機能
+- 一覧表示（ソート・色分け）
+
+### ファイル管理
+- 納品書画像のアップロード（JPG、PNG、PDF）
+- ファイルの表示・ダウンロード
+- ドラッグ&ドロップ対応
+
+### 履歴管理
+- 全変更履歴の記録
+- 変更内容の詳細追跡
+- タイムスタンプ付きログ
+
+## セットアップ手順
+
+### 1. 依存関係のインストール
+
+```bash
+npm install
+```
+
+### 2. Supabaseプロジェクトの作成
+
+1. [Supabase](https://supabase.com/)でアカウント作成
+2. 新しいプロジェクトを作成
+3. プロジェクトの設定から以下の値を取得:
+   - Project URL
+   - API Key（anon/public）
+
+### 3. データベースのセットアップ
+
+1. Supabaseのダッシュボードで「SQL Editor」を開く
+2. `supabase/schema.sql`の内容をコピー&ペースト
+3. SQLを実行してテーブルとRLSポリシーを作成
+
+### 4. ストレージの設定
+
+1. Supabaseダッシュボードで「Storage」を開く
+2. 新しいバケット「package-files」を作成
+3. バケットをPrivateに設定
+
+### 5. 環境変数の設定
+
+`.env.local`ファイルを編集:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+### 6. 開発サーバーの起動
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+http://localhost:3000 でアプリケーションが起動します。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 7. 初期ユーザーの作成
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Supabaseダッシュボードで「Authentication」→「Users」を開く
+2. 「Add user」でユーザーを手動作成
+3. または、アプリケーション内でサインアップ機能を使用
 
-## Learn More
+## データベーススキーマ
 
-To learn more about Next.js, take a look at the following resources:
+### packages（荷物テーブル）
+- 荷物番号、発送元名、発送日、到着予定日
+- 配送ステータス、データ処理ステータス
+- 備考、作成・更新日時
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### package_files（ファイルテーブル）
+- ファイル名、パス、サイズ、MIMEタイプ
+- アップロード日時、アップロード者
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### package_status_history（履歴テーブル）
+- 変更フィールド、変更前後の値
+- 変更日時、変更者、変更理由
 
-## Deploy on Vercel
+## 使用方法
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 荷物の追加
+1. 「新規追加」ボタンをクリック
+2. 必要項目を入力
+3. 「追加」ボタンで保存
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 検索・フィルター
+1. 検索バーで荷物番号・発送元名・備考を検索
+2. 「詳細検索」でステータス・日付でフィルタリング
+3. フィルターはリアルタイムで適用
+
+### ファイル管理
+1. 荷物番号をクリックして詳細画面を開く
+2. 「ファイル」タブでアップロード・管理
+3. ドラッグ&ドロップまたはファイル選択
+
+### 履歴確認
+1. 荷物詳細画面の「履歴」タブ
+2. 全ての変更履歴を時系列で表示
+
+## デプロイ
+
+### Vercelでのデプロイ
+
+1. Vercelアカウント作成
+2. GitHubリポジトリと連携
+3. 環境変数を設定
+4. デプロイ実行
+
+```bash
+# ローカルでビルドテスト
+npm run build
+```

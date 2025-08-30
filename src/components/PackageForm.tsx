@@ -236,7 +236,7 @@ export default function PackageForm({ package: pkg, onClose, onSuccess }: Packag
             </label>
             {(pkg || createdPackageId) && (
               <FileUpload
-                packageId={pkg?.id || createdPackageId}
+                packageId={(pkg?.id || createdPackageId) as string}
                 onFileUploaded={handleFileUploaded}
               />
             )}
@@ -426,7 +426,7 @@ export default function PackageForm({ package: pkg, onClose, onSuccess }: Packag
             </label>
             {(pkg || createdPackageId) && (
               <FileUpload
-                packageId={pkg?.id || createdPackageId}
+                packageId={(pkg?.id || createdPackageId) as string}
                 onFileUploaded={handleFileUploaded}
               />
             )}

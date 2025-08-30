@@ -19,8 +19,8 @@ export default function PackageForm({ package: pkg, onClose, onSuccess }: Packag
     shipper_name: '',
     shipping_date: '',
     estimated_arrival_date: '',
-    delivery_status: DELIVERY_STATUSES[0],
-    data_processing_status: DATA_PROCESSING_STATUSES[0],
+    delivery_status: DELIVERY_STATUSES[0] as typeof DELIVERY_STATUSES[number],
+    data_processing_status: DATA_PROCESSING_STATUSES[0] as typeof DATA_PROCESSING_STATUSES[number],
     remarks: ''
   })
   const [loading, setLoading] = useState(false)

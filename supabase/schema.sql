@@ -6,7 +6,7 @@ CREATE TABLE packages (
     shipping_date DATE NOT NULL,
     estimated_arrival_date DATE NOT NULL,
     delivery_status TEXT NOT NULL CHECK (delivery_status IN ('輸送中（航空便）', '輸送中（船便）', '国内陸送中', '到着（未確認）', '処理済み')),
-    data_processing_status TEXT NOT NULL CHECK (data_processing_status IN ('送り状データ処理済み', '受注データ確認済み', '予約無し')),
+    data_processing_status TEXT NOT NULL CHECK (data_processing_status IN ('予約無し', '処理待ち', '受注データ確認済み', '送り状データ処理済み', '処理完了')),
     remarks TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()) NOT NULL,

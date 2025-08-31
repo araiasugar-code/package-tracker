@@ -176,9 +176,11 @@ export default function PackageList() {
     }
     
     const dataColors: { [key: string]: string } = {
-      '送り状データ処理済み': 'bg-green-100 text-green-800',
-      '受注データ確認済み': 'bg-blue-100 text-blue-800',
-      '予約無し': 'bg-gray-100 text-gray-800'
+      '予約無し': 'bg-gray-100 text-gray-800',
+      '処理待ち': 'bg-red-100 text-red-800',
+      '受注データ確認済み': 'bg-yellow-100 text-yellow-800',
+      '送り状データ処理済み': 'bg-blue-100 text-blue-800',
+      '処理完了': 'bg-green-100 text-green-800'
     }
 
     return deliveryColors[status] || dataColors[status] || 'bg-gray-100 text-gray-800'
@@ -255,20 +257,49 @@ export default function PackageList() {
   const activePackages = getSortedPackages(packages.filter(pkg => pkg.delivery_status !== '処理済み'))
   const completedPackages = getSortedPackages(packages.filter(pkg => pkg.delivery_status === '処理済み'))
 
-  // データ処理ステータスが配列の場合の表示処理
-  const renderDataProcessingStatus = (status: string) => {
-    if (typeof status === 'string') {
+  // データ処理ステータスの表示処理 (新しいフラグベース)
+  const renderDataProcessingStatus = (pkg: Package) => {
+    // 後方互換性: 古いデータの場合はdata_processing_statusを使用
+    const hasReservation = pkg.has_reservation ?? (pkg.data_processing_status !== '予約無し')
+    const orderConfirmed = pkg.order_data_confirmed ?? (pkg.data_processing_status === '受注データ確認済み' || pkg.data_processing_status === '処理完了')
+    const shippingProcessed = pkg.shipping_data_processed ?? (pkg.data_processing_status === '送り状データ処理済み' || pkg.data_processing_status === '処理完了')
+    
+    // 予約なしの場合
+    if (!hasReservation) {
       return (
-        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(status)}`}>
-          {status}
+        <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
+          予約無し
         </span>
       )
     }
-    // 配列の場合は後で対応
+
+    // 予約ありの場合は詳細表示
     return (
-      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(status)}`}>
-        {status}
-      </span>
+      <div className="space-y-1">
+        <div className="flex space-x-1 text-xs">
+          <span className={`px-1 py-0.5 rounded text-xs font-medium ${
+            orderConfirmed ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
+          }`}>
+            受注{orderConfirmed ? '✓' : '○'}
+          </span>
+          <span className={`px-1 py-0.5 rounded text-xs font-medium ${
+            shippingProcessed ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
+          }`}>
+            送り状{shippingProcessed ? '✓' : '○'}
+          </span>
+        </div>
+        {/* 全体ステータス */}
+        <div className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+          orderConfirmed && shippingProcessed
+            ? 'bg-green-100 text-green-800'
+            : orderConfirmed || shippingProcessed
+            ? 'bg-yellow-100 text-yellow-800'
+            : 'bg-red-100 text-red-800'
+        }`}>
+          {orderConfirmed && shippingProcessed ? '処理完了' : 
+           orderConfirmed || shippingProcessed ? '一部完了' : '処理待ち'}
+        </div>
+      </div>
     )
   }
 
@@ -289,7 +320,7 @@ export default function PackageList() {
             <h1 className="text-2xl font-bold text-gray-900">荷物管理システム</h1>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-600">
-                ログイン中: {user?.email}
+                ログイン中: {user?.user_metadata?.full_name || user?.email}
               </span>
               <button
                 onClick={() => signOut()}
@@ -346,7 +377,8 @@ export default function PackageList() {
                   <p className="text-gray-500">進行中の荷物がありません</p>
                 </div>
               ) : (
-              <table className="min-w-full divide-y divide-gray-200">
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -414,10 +446,10 @@ export default function PackageList() {
                         {pkg.shipper_name}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {new Date(pkg.shipping_date).toLocaleDateString('ja-JP')}
+                        {new Date(pkg.shipping_date).toLocaleDateString('ja-JP', { month: '2-digit', day: '2-digit' })}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {new Date(pkg.estimated_arrival_date).toLocaleDateString('ja-JP')}
+                        {new Date(pkg.estimated_arrival_date).toLocaleDateString('ja-JP', { month: '2-digit', day: '2-digit' })}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(pkg.delivery_status)}`}>
@@ -425,10 +457,10 @@ export default function PackageList() {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        {renderDataProcessingStatus(pkg.data_processing_status)}
+                        {renderDataProcessingStatus(pkg)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {new Date(pkg.created_at).toLocaleDateString('ja-JP')} {new Date(pkg.created_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
+                        {new Date(pkg.created_at).toLocaleDateString('ja-JP', { month: '2-digit', day: '2-digit' })} {new Date(pkg.created_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {packageFiles[pkg.id] && packageFiles[pkg.id].length > 0 ? (
@@ -478,6 +510,7 @@ export default function PackageList() {
                   ))}
                 </tbody>
               </table>
+              </div>
               )}
             </div>
           </div>
@@ -493,7 +526,8 @@ export default function PackageList() {
                   <p className="text-gray-500">処理完了済みの荷物がありません</p>
                 </div>
               ) : (
-              <table className="min-w-full divide-y divide-gray-200">
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-green-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -558,16 +592,16 @@ export default function PackageList() {
                         {pkg.shipper_name}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {new Date(pkg.shipping_date).toLocaleDateString('ja-JP')}
+                        {new Date(pkg.shipping_date).toLocaleDateString('ja-JP', { month: '2-digit', day: '2-digit' })}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {new Date(pkg.estimated_arrival_date).toLocaleDateString('ja-JP')}
+                        {new Date(pkg.estimated_arrival_date).toLocaleDateString('ja-JP', { month: '2-digit', day: '2-digit' })}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        {renderDataProcessingStatus(pkg.data_processing_status)}
+                        {renderDataProcessingStatus(pkg)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {new Date(pkg.created_at).toLocaleDateString('ja-JP')} {new Date(pkg.created_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
+                        {new Date(pkg.created_at).toLocaleDateString('ja-JP', { month: '2-digit', day: '2-digit' })} {new Date(pkg.created_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {packageFiles[pkg.id] && packageFiles[pkg.id].length > 0 ? (
@@ -617,6 +651,7 @@ export default function PackageList() {
                   ))}
                 </tbody>
               </table>
+              </div>
               )}
             </div>
           </div>

@@ -19,13 +19,29 @@ function ResetPasswordContent() {
     const params = new URLSearchParams(hashFragment)
     const accessToken = params.get('access_token')
     const refreshToken = params.get('refresh_token')
+    const errorCode = params.get('error_code')
+    const errorDescription = params.get('error_description')
 
+    // エラーがある場合のみエラーメッセージを表示
+    if (errorCode === 'otp_expired') {
+      setError('パスワードリセットリンクの有効期限が切れています。新しいリンクを要求してください。')
+      return
+    }
+
+    if (errorDescription) {
+      setError('認証エラーが発生しました。新しいパスワードリセットリンクを要求してください。')
+      return
+    }
+
+    // トークンがある場合はセッションを設定
     if (accessToken && refreshToken) {
       supabase.auth.setSession({
         access_token: accessToken,
         refresh_token: refreshToken
       })
     }
+    // トークンがない場合でも、エラーを表示せずにフォームを表示する
+    // (Supabaseの認証フローでは正常な場合もある)
   }, [supabase.auth])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -134,6 +150,12 @@ function ResetPasswordContent() {
           {error && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-md">
               <p className="text-sm text-red-600">{error}</p>
+              <button
+                onClick={() => router.push('/')}
+                className="mt-2 text-sm text-indigo-600 hover:text-indigo-500 underline"
+              >
+                ログイン画面に戻る
+              </button>
             </div>
           )}
 

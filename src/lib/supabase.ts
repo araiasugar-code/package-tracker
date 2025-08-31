@@ -126,9 +126,11 @@ export const DELIVERY_STATUSES = [
 ] as const
 
 export const DATA_PROCESSING_STATUSES = [
-  '送り状データ処理済み',
+  '予約無し',
+  '処理待ち',
   '受注データ確認済み',
-  '予約無し'
+  '送り状データ処理済み', 
+  '処理完了'
 ] as const
 
 export type DeliveryStatus = typeof DELIVERY_STATUSES[number]

@@ -66,7 +66,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const resetPassword = async (email: string) => {
-    const redirectUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password`
+    const redirectUrl = 'https://package-tracker-taupe.vercel.app/auth/reset-password'
       
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: redirectUrl

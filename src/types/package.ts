@@ -8,6 +8,9 @@ export interface Package {
   estimated_arrival_date: string
   delivery_status: DeliveryStatus
   data_processing_status: DataProcessingStatus
+  has_reservation: boolean
+  order_data_confirmed: boolean
+  shipping_data_processed: boolean
   remarks: string | null
   created_at: string
   updated_at: string
@@ -21,6 +24,9 @@ export interface PackageInsert {
   estimated_arrival_date: string
   delivery_status: DeliveryStatus
   data_processing_status: DataProcessingStatus
+  has_reservation: boolean
+  order_data_confirmed: boolean
+  shipping_data_processed: boolean
   remarks?: string | null
   created_by: string
 }
@@ -32,6 +38,9 @@ export interface PackageUpdate {
   estimated_arrival_date?: string
   delivery_status?: DeliveryStatus
   data_processing_status?: DataProcessingStatus
+  has_reservation?: boolean
+  order_data_confirmed?: boolean
+  shipping_data_processed?: boolean
   remarks?: string | null
 }
 

@@ -20,8 +20,10 @@ export default function PackageForm({ package: packageProp, onClose, onSuccess }
     shipping_date: '',
     estimated_arrival_date: '',
     delivery_status: DELIVERY_STATUSES[0] as typeof DELIVERY_STATUSES[number],
-    data_processing_status: DATA_PROCESSING_STATUSES[0] as typeof DATA_PROCESSING_STATUSES[number],
-    remarks: ''
+    remarks: '',
+    has_reservation: true,
+    order_data_confirmed: false,
+    shipping_data_processed: false
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -37,12 +39,33 @@ export default function PackageForm({ package: packageProp, onClose, onSuccess }
         shipping_date: packageProp.shipping_date,
         estimated_arrival_date: packageProp.estimated_arrival_date,
         delivery_status: packageProp.delivery_status,
-        data_processing_status: packageProp.data_processing_status,
-        remarks: packageProp.remarks || ''
+        remarks: packageProp.remarks || '',
+        has_reservation: packageProp.has_reservation ?? true,
+        order_data_confirmed: packageProp.order_data_confirmed ?? false,
+        shipping_data_processed: packageProp.shipping_data_processed ?? false
       })
     }
   }, [packageProp])
 
+  // データ処理ステータスを計算する関数
+  const calculateDataProcessingStatus = () => {
+    if (!formData.has_reservation) {
+      return '予約無し'
+    }
+    
+    const { order_data_confirmed, shipping_data_processed } = formData
+    
+    if (order_data_confirmed && shipping_data_processed) {
+      return '処理完了'
+    } else if (order_data_confirmed) {
+      return '受注データ確認済み'
+    } else if (shipping_data_processed) {
+      return '送り状データ処理済み'
+    } else {
+      return '処理待ち'
+    }
+  }
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!user) return
@@ -59,7 +82,10 @@ export default function PackageForm({ package: packageProp, onClose, onSuccess }
           shipping_date: formData.shipping_date,
           estimated_arrival_date: formData.estimated_arrival_date,
           delivery_status: formData.delivery_status,
-          data_processing_status: formData.data_processing_status,
+          data_processing_status: calculateDataProcessingStatus(),
+          has_reservation: formData.has_reservation,
+          order_data_confirmed: formData.order_data_confirmed,
+          shipping_data_processed: formData.shipping_data_processed,
           remarks: formData.remarks || null
         }
         await packageService.updatePackage(packageProp.id, updates, user.id)
@@ -73,7 +99,10 @@ export default function PackageForm({ package: packageProp, onClose, onSuccess }
           shipping_date: formData.shipping_date,
           estimated_arrival_date: formData.estimated_arrival_date,
           delivery_status: formData.delivery_status,
-          data_processing_status: formData.data_processing_status,
+          data_processing_status: calculateDataProcessingStatus(),
+          has_reservation: formData.has_reservation,
+          order_data_confirmed: formData.order_data_confirmed,
+          shipping_data_processed: formData.shipping_data_processed,
           remarks: formData.remarks || null,
           created_by: user.id
         }
@@ -198,20 +227,63 @@ export default function PackageForm({ package: packageProp, onClose, onSuccess }
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                データ処理ステータス *
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                データ処理設定
               </label>
-              <select
-                name="data_processing_status"
-                required
-                value={formData.data_processing_status}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              >
-                {DATA_PROCESSING_STATUSES.map(status => (
-                  <option key={status} value={status}>{status}</option>
-                ))}
-              </select>
+              <div className="space-y-3">
+                {/* 予約の有無 */}
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="has_reservation"
+                    name="has_reservation"
+                    checked={formData.has_reservation}
+                    onChange={(e) => setFormData(prev => ({ 
+                      ...prev, 
+                      has_reservation: e.target.checked,
+                      // 予約なしにした場合は処理フラグをリセット
+                      order_data_confirmed: e.target.checked ? prev.order_data_confirmed : false,
+                      shipping_data_processed: e.target.checked ? prev.shipping_data_processed : false
+                    }))}
+                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                  />
+                  <label htmlFor="has_reservation" className="ml-2 text-sm text-gray-700">
+                    予約受注商品が含まれている
+                  </label>
+                </div>
+                
+                {/* 予約ありの場合の処理項目 */}
+                {formData.has_reservation && (
+                  <div className="ml-6 space-y-2 border-l-2 border-indigo-200 pl-4">
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id="order_data_confirmed"
+                        name="order_data_confirmed"
+                        checked={formData.order_data_confirmed}
+                        onChange={(e) => setFormData(prev => ({ ...prev, order_data_confirmed: e.target.checked }))}
+                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                      />
+                      <label htmlFor="order_data_confirmed" className="ml-2 text-sm text-gray-700">
+                        受注データ確認済み
+                      </label>
+                    </div>
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id="shipping_data_processed"
+                        name="shipping_data_processed"
+                        checked={formData.shipping_data_processed}
+                        onChange={(e) => setFormData(prev => ({ ...prev, shipping_data_processed: e.target.checked }))}
+                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                      />
+                      <label htmlFor="shipping_data_processed" className="ml-2 text-sm text-gray-700">
+                        送り状データ処理済み
+                      </label>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
@@ -255,15 +327,21 @@ export default function PackageForm({ package: packageProp, onClose, onSuccess }
 
           {/* データ処理ステータス関連の説明 */}
           <div className={`border rounded-md p-3 ${
-            formData.data_processing_status === '予約無し' 
-              ? 'bg-yellow-50 border-yellow-200' 
+            !formData.has_reservation
+              ? 'bg-gray-50 border-gray-200' 
+              : formData.order_data_confirmed && formData.shipping_data_processed
+              ? 'bg-green-50 border-green-200'
               : 'bg-blue-50 border-blue-200'
           }`}>
             <div className="flex">
               <div className="flex-shrink-0">
-                {formData.data_processing_status === '予約無し' ? (
-                  <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                {!formData.has_reservation ? (
+                  <svg className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                ) : formData.order_data_confirmed && formData.shipping_data_processed ? (
+                  <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
                 ) : (
                   <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
@@ -272,14 +350,22 @@ export default function PackageForm({ package: packageProp, onClose, onSuccess }
                 )}
               </div>
               <div className="ml-3">
-                {formData.data_processing_status === '予約無し' ? (
-                  <p className="text-sm text-yellow-700">
-                    「予約無し」を選択した場合、追加のデータ処理は不要です。
+                <p className="text-sm font-medium">
+                  ステータス: <strong>{calculateDataProcessingStatus()}</strong>
+                </p>
+                {!formData.has_reservation ? (
+                  <p className="text-xs text-gray-600 mt-1">
+                    予約受注商品が含まれていないため、データ処理は不要です。
+                  </p>
+                ) : formData.order_data_confirmed && formData.shipping_data_processed ? (
+                  <p className="text-xs text-green-600 mt-1">
+                    すべての処理が完了しています。
                   </p>
                 ) : (
-                  <p className="text-sm text-blue-700">
-                    <strong>「{formData.data_processing_status}」</strong>を選択した場合、
-                    送り状データ処理と受注データ確認の両方が必要です。
+                  <p className="text-xs text-blue-600 mt-1">
+                    {!formData.order_data_confirmed && !formData.shipping_data_processed && "受注データ確認と送り状データ処理が必要です。"}
+                    {formData.order_data_confirmed && !formData.shipping_data_processed && "送り状データ処理が必要です。"}
+                    {!formData.order_data_confirmed && formData.shipping_data_processed && "受注データ確認が必要です。"}
                   </p>
                 )}
               </div>
@@ -388,20 +474,63 @@ export default function PackageForm({ package: packageProp, onClose, onSuccess }
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                データ処理ステータス *
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                データ処理設定
               </label>
-              <select
-                name="data_processing_status"
-                required
-                value={formData.data_processing_status}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              >
-                {DATA_PROCESSING_STATUSES.map(status => (
-                  <option key={status} value={status}>{status}</option>
-                ))}
-              </select>
+              <div className="space-y-3">
+                {/* 予約の有無 */}
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="has_reservation"
+                    name="has_reservation"
+                    checked={formData.has_reservation}
+                    onChange={(e) => setFormData(prev => ({ 
+                      ...prev, 
+                      has_reservation: e.target.checked,
+                      // 予約なしにした場合は処理フラグをリセット
+                      order_data_confirmed: e.target.checked ? prev.order_data_confirmed : false,
+                      shipping_data_processed: e.target.checked ? prev.shipping_data_processed : false
+                    }))}
+                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                  />
+                  <label htmlFor="has_reservation" className="ml-2 text-sm text-gray-700">
+                    予約受注商品が含まれている
+                  </label>
+                </div>
+                
+                {/* 予約ありの場合の処理項目 */}
+                {formData.has_reservation && (
+                  <div className="ml-6 space-y-2 border-l-2 border-indigo-200 pl-4">
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id="order_data_confirmed"
+                        name="order_data_confirmed"
+                        checked={formData.order_data_confirmed}
+                        onChange={(e) => setFormData(prev => ({ ...prev, order_data_confirmed: e.target.checked }))}
+                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                      />
+                      <label htmlFor="order_data_confirmed" className="ml-2 text-sm text-gray-700">
+                        受注データ確認済み
+                      </label>
+                    </div>
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id="shipping_data_processed"
+                        name="shipping_data_processed"
+                        checked={formData.shipping_data_processed}
+                        onChange={(e) => setFormData(prev => ({ ...prev, shipping_data_processed: e.target.checked }))}
+                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                      />
+                      <label htmlFor="shipping_data_processed" className="ml-2 text-sm text-gray-700">
+                        送り状データ処理済み
+                      </label>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
@@ -444,15 +573,21 @@ export default function PackageForm({ package: packageProp, onClose, onSuccess }
 
           {/* データ処理ステータス関連の説明 */}
           <div className={`border rounded-md p-3 ${
-            formData.data_processing_status === '予約無し' 
-              ? 'bg-yellow-50 border-yellow-200' 
+            !formData.has_reservation
+              ? 'bg-gray-50 border-gray-200' 
+              : formData.order_data_confirmed && formData.shipping_data_processed
+              ? 'bg-green-50 border-green-200'
               : 'bg-blue-50 border-blue-200'
           }`}>
             <div className="flex">
               <div className="flex-shrink-0">
-                {formData.data_processing_status === '予約無し' ? (
-                  <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                {!formData.has_reservation ? (
+                  <svg className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                ) : formData.order_data_confirmed && formData.shipping_data_processed ? (
+                  <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
                 ) : (
                   <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
@@ -461,14 +596,22 @@ export default function PackageForm({ package: packageProp, onClose, onSuccess }
                 )}
               </div>
               <div className="ml-3">
-                {formData.data_processing_status === '予約無し' ? (
-                  <p className="text-sm text-yellow-700">
-                    「予約無し」を選択した場合、追加のデータ処理は不要です。
+                <p className="text-sm font-medium">
+                  ステータス: <strong>{calculateDataProcessingStatus()}</strong>
+                </p>
+                {!formData.has_reservation ? (
+                  <p className="text-xs text-gray-600 mt-1">
+                    予約受注商品が含まれていないため、データ処理は不要です。
+                  </p>
+                ) : formData.order_data_confirmed && formData.shipping_data_processed ? (
+                  <p className="text-xs text-green-600 mt-1">
+                    すべての処理が完了しています。
                   </p>
                 ) : (
-                  <p className="text-sm text-blue-700">
-                    <strong>「{formData.data_processing_status}」</strong>を選択した場合、
-                    送り状データ処理と受注データ確認の両方が必要です。
+                  <p className="text-xs text-blue-600 mt-1">
+                    {!formData.order_data_confirmed && !formData.shipping_data_processed && "受注データ確認と送り状データ処理が必要です。"}
+                    {formData.order_data_confirmed && !formData.shipping_data_processed && "送り状データ処理が必要です。"}
+                    {!formData.order_data_confirmed && formData.shipping_data_processed && "受注データ確認が必要です。"}
                   </p>
                 )}
               </div>
